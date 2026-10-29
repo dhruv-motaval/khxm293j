@@ -16,3 +16,8 @@ dist/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Submission meta (kept locally, never pushed)
+/docs/
+SUBMISSION_GUIDE.md
+render.yaml
