@@ -14,11 +14,11 @@ A React + FastAPI pilot dashboard for reviewing GB national wind-generation fore
 ## What it does
 
 - Shows daily mean forecast and actual GB wind generation for January 2026.
-- Reconstructs a day-ahead forecast vintage for each half-hour using `publishTime` and `startTime`.
+- Reconstructs a day-ahead forecast vintage for each published forecast hour using `publishTime` and `startTime` (WINDFOR is hourly; FUELHH actuals cover all 48 settlement periods per day).
 - Lets the reviewer change the historical decision cutoff (default `09:00`, Europe/London) and recomputes the forecast-vintage selection.
 - Calculates MAE, RMSE, forecast bias, coverage, and a guarded MAPE measure.
-- Provides half-hourly inspection including the selected forecast publication time, forecast lead time, actual generation, error, and absolute error.
-- Exports matched half-hourly records to CSV.
+- Provides period-level inspection including the selected forecast publication time, forecast lead time, actual generation, error, and absolute error.
+- Exports matched periods to CSV.
 - Documents method assumptions and limits in the UI and this README.
 
 ## Technology
@@ -32,7 +32,7 @@ A React + FastAPI pilot dashboard for reviewing GB national wind-generation fore
 
 The backend calls the public Elexon Insights API without an API key:
 
-- Actual half-hourly generation: `GET https://data.elexon.co.uk/bmrs/api/v1/datasets/FUELHH/stream`
+- Actual generation (48 settlement periods per day): `GET https://data.elexon.co.uk/bmrs/api/v1/datasets/FUELHH/stream`
 - Wind forecast publications: `GET https://data.elexon.co.uk/bmrs/api/v1/datasets/WINDFOR/stream`
 - API documentation: https://bmrs.elexon.co.uk/api-documentation
 - Elexon developer portal: https://developer.data.elexon.co.uk/
@@ -45,7 +45,7 @@ Please preserve Elexon's attribution and terms when redistributing or deploying 
 
 The challenge says that purchasing decisions are made one day before delivery but does not specify a universal cutoff timestamp. This implementation uses **09:00 Europe/London on the preceding calendar day** as the default analytical cutoff. This is a configurable, documented modelling assumption, not a claim that every UK market product has the same gate closure. To test another assumed cutoff, use the time selector and press **Apply**.
 
-For every delivery half-hour:
+For every delivery period:
 
 1. Convert `startTime` to the `Europe/London` delivery date.
 2. Calculate that date minus one calendar day at the configured cutoff.
@@ -59,11 +59,11 @@ January 2026 is in GMT, but the code uses `zoneinfo` and `Europe/London` so that
 ## Metric definitions
 
 - **Forecast error / bias per period:** `forecast_mw - actual_mw`. Positive means wind output was over-forecast; negative means it was under-forecast.
-- **MAE:** mean absolute error across all matched half-hours, in MW.
+- **MAE:** mean absolute error across all matched periods, in MW.
 - **RMSE:** square root of mean squared error, in MW; larger misses receive more weight.
 - **Bias:** mean signed forecast error, in MW.
 - **MAPE:** mean absolute percentage error, excluding periods with actual wind generation below 100 MW because percentages become unstable near zero. The UI shows how many periods contribute to MAPE. MAE, RMSE and bias still use all matched periods.
-- **Coverage:** matched periods divided by the expected number of half-hour periods in the month. **WINDFOR forecasts are published hourly** (whole-hour startTimes), while FUELHH actuals are half-hourly; with exact-time matching this yields one matched period per hour and roughly 50% coverage. Missing records are reported as missing; no estimates are inserted.
+- **Coverage:** matched periods divided by all settlement periods in the month (1,488 for January: 48 per day). WINDFOR forecasts are published hourly while FUELHH actuals cover all 48 settlement periods per day; with exact-time matching this yields one matched period per hour and roughly 50% coverage. Missing records are reported as missing; no estimates are inserted.
 
 This is a forecast-quality review, not a trading P&L, price forecast, or complete procurement calculator. With only wind forecast and wind actual data, the app cannot determine consumer demand, the residual demand to be served, the power deficit, or required thermal procurement. Those require extra datasets, which the challenge explicitly excludes.
 
@@ -184,7 +184,7 @@ The assessment brief requires an unlisted YouTube video with two parts and a max
 - **0:00–0:35 — Business problem:** Wind is variable; the buyer needs an auditable day-ahead view of forecast uncertainty.
 - **0:35–1:20 — What the portal shows:** January 2026, national wind-only data, daily forecast-versus-actual trend and error metrics.
 - **1:20–2:15 — Decision-time integrity:** Explain the selected cutoff and why forecast vintages published after it are excluded.
-- **2:15–3:25 — Explore a day:** Change the day, inspect individual half-hours, publication time, lead time, and error direction.
+- **2:15–3:25 — Explore a day:** Change the day, inspect individual periods, publication time, lead time, and error direction.
 - **3:25–4:15 — Accuracy interpretation:** Explain MAE, RMSE, signed bias and the guarded MAPE.
 - **4:15–4:50 — Scope honestly:** Explain that wind-only series quantify uncertainty but cannot calculate the total procurement deficit without demand data.
 

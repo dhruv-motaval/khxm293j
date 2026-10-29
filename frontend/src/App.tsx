@@ -182,7 +182,7 @@ export default function App() {
                 <>
                   <section className="panel">
                     <div className="day-summary">
-                      <div><span>MATCHED HALF-HOURS</span><b>{formatNumber(metrics?.matched_periods)}</b></div>
+                      <div><span>MATCHED PERIODS</span><b>{formatNumber(metrics?.matched_periods)}</b></div>
                       <div><span>EXPECTED PERIODS</span><b>{formatNumber(dashboard.data_quality.expected_periods, 0)}</b></div>
                       <div><span>NOT MATCHED</span><b>{formatNumber(dashboard.data_quality.unmatched_periods, 0)}</b></div>
                       <div><span>SOURCE ROWS (ACTUALS / FORECASTS)</span><b>{formatNumber(dashboard.data_quality.actual_rows_received)} <small>/</small> {formatNumber(dashboard.data_quality.forecast_rows_received)}</b></div>
@@ -194,7 +194,7 @@ export default function App() {
                       <div><span className="method-number">04</span><b>Percentage metric</b><p>{dashboard.methodology.mape}</p></div>
                       <div className="scope-warning"><span className="method-number">05</span><b>Scope limitation</b><p>{dashboard.methodology.scope_limit}</p></div>
                     </div>
-                    <div className="table-footnote"><Database size={13} /><span><b>{formatNumber(metrics?.matched_periods)}</b> of <b>{formatNumber(dashboard.data_quality.expected_periods)}</b> half-hours matched for {dashboard.month} · WINDFOR forecasts are recorded hourly · missing records are not imputed.</span></div>
+                    <div className="table-footnote"><Database size={13} /><span><b>{formatNumber(metrics?.matched_periods)}</b> of <b>{formatNumber(dashboard.data_quality.expected_periods)}</b> settlement periods matched for {dashboard.month} · WINDFOR forecasts are recorded hourly · missing records are not imputed.</span></div>
                   </section>
                   <footer className="page-footer"><span>WIND SIGNAL <i>·</i> ENGINEERING PILOT</span><span>WIND-ONLY SCOPE: NOT A TOTAL PROCUREMENT POSITION <i>·</i> DATA BY ELEXON INSIGHTS (FUELHH, WINDFOR) <i>·</i> TIMES IN EUROPE/LONDON</span></footer>
                 </>
@@ -204,7 +204,7 @@ export default function App() {
                 <MetricCard label="MEAN ABSOLUTE ERROR" value={formatNumber(metrics?.mae_mw, 1)} unit="MW" detail="Average absolute forecast miss" icon={<Activity size={17} />} />
                 <MetricCard label="ROOT MEAN SQUARED ERROR" value={formatNumber(metrics?.rmse_mw, 1)} unit="MW" detail="Penalises larger forecast misses" icon={<Gauge size={17} />} />
                 <MetricCard label="FORECAST BIAS" value={metrics?.bias_mw == null ? '—' : `${metrics.bias_mw > 0 ? '+' : ''}${formatNumber(metrics.bias_mw, 1)}`} unit="MW" detail={metrics?.bias_mw == null ? 'Forecast minus actual' : metrics.bias_mw > 0 ? 'Wind was over-forecast on average' : metrics.bias_mw < 0 ? 'Wind was under-forecast on average' : 'No mean directional error'} icon={metrics?.bias_mw != null && metrics.bias_mw < 0 ? <ArrowDownRight size={17} /> : <ArrowUpRight size={17} />} tone={biasTone} />
-                <MetricCard label="MATCHED PERIODS" value={formatNumber(metrics?.matched_periods)} unit="/ 1,488" detail={`${formatNumber(metrics?.coverage_pct, 1)}% of January half-hours (forecasts published hourly)`} icon={<CheckCircle2 size={17} />} />
+                <MetricCard label="MATCHED PERIODS" value={formatNumber(metrics?.matched_periods)} unit="/ 1,488" detail={`${formatNumber(metrics?.coverage_pct, 1)}% of all settlement periods (forecast records hourly)`} icon={<CheckCircle2 size={17} />} />
               </section>
 
               <section className="chart-grid">
@@ -219,7 +219,7 @@ export default function App() {
                     <Line type="monotone" dataKey="forecast_mw" name="Forecast" stroke="#7186a5" strokeWidth={2} dot={false} activeDot={{ r: 4 }} connectNulls />
                     <Line type="monotone" dataKey="actual_mw" name="Actual" stroke="#14a68c" strokeWidth={2.2} dot={false} activeDot={{ r: 4 }} connectNulls />
                   </ComposedChart></ResponsiveContainer></div> : <EmptyChart />}
-                  <div className="chart-footer"><span><b>{dashboard.daily.length}</b> days with matched data</span><span>Select a day below to inspect half-hourly records</span></div>
+                  <div className="chart-footer"><span><b>{dashboard.daily.length}</b> days with matched data</span><span>Select a day below to inspect matched periods</span></div>
                 </article>
 
                 <article className="panel error-panel-chart">
@@ -242,7 +242,7 @@ export default function App() {
                   {selectedPeriods.map((period) => <tr key={period.start_time}><td className="period-time">{formatUKTime(period.start_time)}<span>{period.settlement_period != null ? `SP ${period.settlement_period}` : '30 min'}</span></td><td className="numeric">{formatNumber(period.forecast_mw, 1)}</td><td className="numeric">{formatNumber(period.actual_mw, 1)}</td><td className={`numeric error-value ${period.error_mw > 0 ? 'over' : period.error_mw < 0 ? 'under' : ''}`}>{period.error_mw > 0 ? '+' : ''}{formatNumber(period.error_mw, 1)}</td><td className="published-cell">{formatUKTime(period.publish_time)}</td><td className="numeric lead-cell">{formatNumber(period.forecast_lead_hours, 1)}h</td></tr>)}
                   {selectedPeriods.length === 0 && <tr><td colSpan={6} className="empty-row">No periods have both an actual record and a forecast published before the selected cutoff.</td></tr>}
                 </tbody></table></div>
-                <div className="table-footnote"><Database size={13} /><span><b>{formatNumber(metrics?.matched_periods)}</b> of <b>{formatNumber(dashboard.data_quality.expected_periods)}</b> half-hours matched for {dashboard.month} · WINDFOR forecasts are recorded hourly · missing records are not imputed.</span></div>
+                <div className="table-footnote"><Database size={13} /><span><b>{formatNumber(metrics?.matched_periods)}</b> of <b>{formatNumber(dashboard.data_quality.expected_periods)}</b> settlement periods matched for {dashboard.month} · WINDFOR forecasts are recorded hourly · missing records are not imputed.</span></div>
               </section>
 
               <footer className="page-footer"><span>WIND SIGNAL <i>·</i> ENGINEERING PILOT</span><span>WIND-ONLY SCOPE: NOT A TOTAL PROCUREMENT POSITION <i>·</i> DATA BY ELEXON INSIGHTS (FUELHH, WINDFOR) <i>·</i> TIMES IN EUROPE/LONDON</span></footer>
