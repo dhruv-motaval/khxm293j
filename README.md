@@ -63,7 +63,7 @@ January 2026 is in GMT, but the code uses `zoneinfo` and `Europe/London` so that
 - **RMSE:** square root of mean squared error, in MW; larger misses receive more weight.
 - **Bias:** mean signed forecast error, in MW.
 - **MAPE:** mean absolute percentage error, excluding periods with actual wind generation below 100 MW because percentages become unstable near zero. The UI shows how many periods contribute to MAPE. MAE, RMSE and bias still use all matched periods.
-- **Coverage:** matched periods divided by the expected number of half-hour periods in the month. Missing records are reported as missing; no estimates are inserted.
+- **Coverage:** matched periods divided by the expected number of half-hour periods in the month. **WINDFOR forecasts are published hourly** (whole-hour startTimes), while FUELHH actuals are half-hourly; with exact-time matching this yields one matched period per hour and roughly 50% coverage. Missing records are reported as missing; no estimates are inserted.
 
 This is a forecast-quality review, not a trading P&L, price forecast, or complete procurement calculator. With only wind forecast and wind actual data, the app cannot determine consumer demand, the residual demand to be served, the power deficit, or required thermal procurement. Those require extra datasets, which the challenge explicitly excludes.
 

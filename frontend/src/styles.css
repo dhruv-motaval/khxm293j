@@ -166,7 +166,7 @@ tbody tr:hover { background: #f8fbfa; }
 .methodology-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; }
 .methodology-grid > div { position: relative; padding: 21px 20px 22px 56px; border-bottom: 1px solid #edf1f4; min-height: 115px; }
 .methodology-grid > div:nth-child(odd) { border-right: 1px solid #edf1f4; }
-.methodology-grid > div:nth-last-child(-n+2) { border-bottom: 0; }
+.methodology-grid > div:last-child { border-bottom: 0; }
 .methodology-grid b { color: #22374c; font-size: 13px; }
 .methodology-grid p { color: #64768a; font-size: 12.5px; line-height: 1.65; margin: 8px 0 0; }
 .method-number { position: absolute; top: 21px; left: 20px; color: #16a68c; font: 500 11px 'DM Mono', monospace; }

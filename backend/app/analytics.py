@@ -79,10 +79,11 @@ def dashboard_payload(raw: dict[str, Any]) -> dict[str, Any]:
             "matched_periods": len(periods),
             "expected_periods": expected,
             "unmatched_periods": max(0, (expected or len(periods)) - len(periods)),
-            "completeness_note": f"Coverage compares {len(periods):,} matched forecast/actual half-hours with {expected:,} expected periods for {raw['month']}. Missing forecasts or outturn records are not imputed.",
+            "completeness_note": f"Coverage compares {len(periods):,} matched forecast records with {expected:,} possible half-hours in {raw['month']}. WINDFOR forecasts are published hourly (whole-hour startTimes) while FUELHH actuals are half-hourly, so matched records occur at hourly intervals; missing records are not imputed.",
         },
         "methodology": {
             "forecast_selection": "For each delivery half-hour, select the record with the latest publishTime at or before the configured cutoff on the previous UK calendar day.",
+            "forecast_resolution": "The WINDFOR forecast dataset is published at hourly resolution (whole-hour startTimes only), while FUELHH actuals are half-hourly. A period is matched only where both datasets contain a record at the identical startTime, so matched periods appear hourly and coverage is reported against all half-hour periods of the month.",
             "error_sign": "Forecast error = forecast MW − actual MW. Positive bias means wind was over-forecast; negative bias means it was under-forecast.",
             "mape": "MAPE excludes half-hours where actual wind generation is below 100 MW to avoid unstable percentages near zero. MAE, RMSE and bias use every matched half-hour.",
             "scope_limit": "Wind generation alone cannot determine total electricity procurement or thermal generation requirements; demand and other generation sources are intentionally outside this brief's data scope.",

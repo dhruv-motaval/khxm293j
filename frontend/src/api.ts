@@ -50,6 +50,7 @@ export type Dashboard = {
   }
   methodology: {
     forecast_selection: string
+    forecast_resolution: string
     error_sign: string
     mape: string
     scope_limit: string

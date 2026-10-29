@@ -189,11 +189,12 @@ export default function App() {
                     </div>
                     <div className="methodology-grid">
                       <div><span className="method-number">01</span><b>Forecast vintage selection</b><p>{dashboard.methodology.forecast_selection}</p></div>
-                      <div><span className="method-number">02</span><b>Error interpretation</b><p>{dashboard.methodology.error_sign}</p></div>
-                      <div><span className="method-number">03</span><b>Percentage metric</b><p>{dashboard.methodology.mape}</p></div>
-                      <div className="scope-warning"><span className="method-number">04</span><b>Scope limitation</b><p>{dashboard.methodology.scope_limit}</p></div>
+                      <div><span className="method-number">02</span><b>Forecast resolution</b><p>{dashboard.methodology.forecast_resolution}</p></div>
+                      <div><span className="method-number">03</span><b>Error interpretation</b><p>{dashboard.methodology.error_sign}</p></div>
+                      <div><span className="method-number">04</span><b>Percentage metric</b><p>{dashboard.methodology.mape}</p></div>
+                      <div className="scope-warning"><span className="method-number">05</span><b>Scope limitation</b><p>{dashboard.methodology.scope_limit}</p></div>
                     </div>
-                    <div className="table-footnote"><Database size={13} /><span><b>{formatNumber(metrics?.matched_periods)}</b> of <b>{formatNumber(dashboard.data_quality.expected_periods)}</b> half-hours matched for {dashboard.month} · missing forecast or outturn records are not imputed.</span></div>
+                    <div className="table-footnote"><Database size={13} /><span><b>{formatNumber(metrics?.matched_periods)}</b> of <b>{formatNumber(dashboard.data_quality.expected_periods)}</b> half-hours matched for {dashboard.month} · WINDFOR forecasts are recorded hourly · missing records are not imputed.</span></div>
                   </section>
                   <footer className="page-footer"><span>WIND SIGNAL <i>·</i> ENGINEERING PILOT</span><span>WIND-ONLY SCOPE: NOT A TOTAL PROCUREMENT POSITION <i>·</i> DATA BY ELEXON INSIGHTS (FUELHH, WINDFOR) <i>·</i> TIMES IN EUROPE/LONDON</span></footer>
                 </>
@@ -203,7 +204,7 @@ export default function App() {
                 <MetricCard label="MEAN ABSOLUTE ERROR" value={formatNumber(metrics?.mae_mw, 1)} unit="MW" detail="Average absolute forecast miss" icon={<Activity size={17} />} />
                 <MetricCard label="ROOT MEAN SQUARED ERROR" value={formatNumber(metrics?.rmse_mw, 1)} unit="MW" detail="Penalises larger forecast misses" icon={<Gauge size={17} />} />
                 <MetricCard label="FORECAST BIAS" value={metrics?.bias_mw == null ? '—' : `${metrics.bias_mw > 0 ? '+' : ''}${formatNumber(metrics.bias_mw, 1)}`} unit="MW" detail={metrics?.bias_mw == null ? 'Forecast minus actual' : metrics.bias_mw > 0 ? 'Wind was over-forecast on average' : metrics.bias_mw < 0 ? 'Wind was under-forecast on average' : 'No mean directional error'} icon={metrics?.bias_mw != null && metrics.bias_mw < 0 ? <ArrowDownRight size={17} /> : <ArrowUpRight size={17} />} tone={biasTone} />
-                <MetricCard label="MATCHED HALF-HOURS" value={formatNumber(metrics?.matched_periods)} unit="/ 1,488" detail={`${formatNumber(metrics?.coverage_pct, 1)}% January period coverage`} icon={<CheckCircle2 size={17} />} />
+                <MetricCard label="MATCHED PERIODS" value={formatNumber(metrics?.matched_periods)} unit="/ 1,488" detail={`${formatNumber(metrics?.coverage_pct, 1)}% of January half-hours (forecasts published hourly)`} icon={<CheckCircle2 size={17} />} />
               </section>
 
               <section className="chart-grid">
@@ -235,13 +236,13 @@ export default function App() {
               </section>
 
               <section className="panel periods-panel">
-                <div className="periods-head"><div><div className="panel-kicker">HALF-HOURLY DETAIL</div><h2>Delivery-period inspection</h2><p>Review selected day’s forecast vintage, actual output and forecast error.</p></div><div className="table-actions"><label className="date-picker-label"><CalendarDays size={15} /><select value={selectedDay} onChange={(event) => setSelectedDay(event.target.value)}>{(dashboard.daily.length ? dashboard.daily.map((day) => day.date) : ['2026-01-01']).map((day) => <option value={day} key={day}>{formatDate(day)}</option>)}</select><ChevronDown size={13} /></label><button className="export-button" onClick={downloadPeriods}><Download size={14} /> Export month CSV</button></div></div>
+                <div className="periods-head"><div><div className="panel-kicker">DELIVERY-PERIOD DETAIL</div><h2>Delivery-period inspection</h2><p>Review selected day’s forecast vintage, actual output and forecast error.</p></div><div className="table-actions"><label className="date-picker-label"><CalendarDays size={15} /><select value={selectedDay} onChange={(event) => setSelectedDay(event.target.value)}>{(dashboard.daily.length ? dashboard.daily.map((day) => day.date) : ['2026-01-01']).map((day) => <option value={day} key={day}>{formatDate(day)}</option>)}</select><ChevronDown size={13} /></label><button className="export-button" onClick={downloadPeriods}><Download size={14} /> Export month CSV</button></div></div>
                 <div className="day-summary"><div><span>SELECTED DAY</span><b>{selectedDay ? new Date(`${selectedDay}T12:00:00Z`).toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: 'long', year: 'numeric', timeZone: 'UTC' }) : '—'}</b></div><div><span>MEAN FORECAST</span><b>{formatNumber(selectedDaily?.forecast_mw, 0)} <small>MW</small></b></div><div><span>MEAN ACTUAL</span><b>{formatNumber(selectedDaily?.actual_mw, 0)} <small>MW</small></b></div><div><span>DAILY MAE</span><b>{formatNumber(selectedDaily?.mae_mw, 1)} <small>MW</small></b></div></div>
                 <div className="table-scroll"><table><thead><tr><th>DELIVERY TIME (UK)</th><th className="numeric">FORECAST</th><th className="numeric">ACTUAL</th><th className="numeric">ERROR</th><th>PUBLISHED (UK)</th><th className="numeric">LEAD</th></tr></thead><tbody>
                   {selectedPeriods.map((period) => <tr key={period.start_time}><td className="period-time">{formatUKTime(period.start_time)}<span>{period.settlement_period != null ? `SP ${period.settlement_period}` : '30 min'}</span></td><td className="numeric">{formatNumber(period.forecast_mw, 1)}</td><td className="numeric">{formatNumber(period.actual_mw, 1)}</td><td className={`numeric error-value ${period.error_mw > 0 ? 'over' : period.error_mw < 0 ? 'under' : ''}`}>{period.error_mw > 0 ? '+' : ''}{formatNumber(period.error_mw, 1)}</td><td className="published-cell">{formatUKTime(period.publish_time)}</td><td className="numeric lead-cell">{formatNumber(period.forecast_lead_hours, 1)}h</td></tr>)}
                   {selectedPeriods.length === 0 && <tr><td colSpan={6} className="empty-row">No periods have both an actual record and a forecast published before the selected cutoff.</td></tr>}
                 </tbody></table></div>
-                <div className="table-footnote"><Database size={13} /><span><b>{formatNumber(metrics?.matched_periods)}</b> of <b>{formatNumber(dashboard.data_quality.expected_periods)}</b> half-hours matched for {dashboard.month} · missing forecast or outturn records are not imputed.</span></div>
+                <div className="table-footnote"><Database size={13} /><span><b>{formatNumber(metrics?.matched_periods)}</b> of <b>{formatNumber(dashboard.data_quality.expected_periods)}</b> half-hours matched for {dashboard.month} · WINDFOR forecasts are recorded hourly · missing records are not imputed.</span></div>
               </section>
 
               <footer className="page-footer"><span>WIND SIGNAL <i>·</i> ENGINEERING PILOT</span><span>WIND-ONLY SCOPE: NOT A TOTAL PROCUREMENT POSITION <i>·</i> DATA BY ELEXON INSIGHTS (FUELHH, WINDFOR) <i>·</i> TIMES IN EUROPE/LONDON</span></footer>
