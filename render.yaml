@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: wind-signal-api
+    runtime: docker
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: ELEXON_BASE_URL
+        value: https://data.elexon.co.uk/bmrs/api/v1
+      - key: CACHE_TTL_SECONDS
+        value: "900"
+      - key: REQUEST_TIMEOUT_SECONDS
+        value: "30"
+      - key: CORS_ORIGINS
+        value: http://localhost:5173,http://127.0.0.1:5173
