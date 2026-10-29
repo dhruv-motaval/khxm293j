@@ -2,6 +2,13 @@
 
 A React + FastAPI pilot dashboard for reviewing GB national wind-generation forecast accuracy around day-ahead electricity purchasing decisions. The assessment window is January 2026, using **only** Elexon's `FUELHH` actual-generation dataset and `WINDFOR` forecast dataset, as required by the challenge brief.
 
+## Live deployment
+
+- **Frontend (the app to review):** https://khxm293j-mdtk.vercel.app/
+- **Backend API:** https://khxm293j.vercel.app/ · health: https://khxm293j.vercel.app/health · docs: https://khxm293j.vercel.app/docs
+- **Public repository:** https://github.com/dhruv-motaval/khxm293j
+
+
 > **Data integrity:** the app does not silently replace failed API requests with fabricated values. Metrics are calculated only from records returned by Elexon that have both an actual wind-generation value and a forecast published before the configured decision cutoff.
 
 ## What it does
@@ -18,7 +25,7 @@ A React + FastAPI pilot dashboard for reviewing GB national wind-generation fore
 
 - **Frontend:** React 18, TypeScript, Vite, Recharts, Lucide icons.
 - **Backend:** Python 3.12, FastAPI, HTTPX, Pydantic Settings.
-- **Deployment/container:** Docker, Docker Compose; intended for a Vercel frontend and Render-hosted API.
+- **Deployment/container:** Docker + Docker Compose for local parity; both services deployed on Vercel (frontend static build, backend on Vercel's Python serverless runtime).
 - **Tests:** Pytest unit tests for forecast-vintage filtering and metric calculations.
 
 ## Data sources and access
@@ -88,7 +95,6 @@ This is a forecast-quality review, not a trading P&L, price forecast, or complet
 │   ├── vite.config.ts
 │   └── vercel.json
 ├── docker-compose.yml
-├── render.yaml
 └── README.md
 ```
 
@@ -153,26 +159,21 @@ Tests cover metric arithmetic, MAPE low-output handling, the forecast error sign
 
 ## Deployment
 
-A live public deployment is **not embedded in this source archive**. Deploy the API and frontend separately, then put the API URL into the Vercel frontend environment.
+The app is live on Vercel, in **two projects** built from this repository:
 
-### 1. Deploy the API to Render
+| Service | URL | Setup |
+|---|---|---|
+| **Frontend** | https://khxm293j-mdtk.vercel.app/ | Root directory `frontend`; Vite build (output `dist`); SPA rewrites via `frontend/vercel.json` |
+| **Backend API** | https://khxm293j.vercel.app/ | Root directory `backend`; FastAPI served by Vercel's Python serverless runtime |
 
-1. Push this directory to a public GitHub repository.
-2. In Render, create a new Web Service from the repository. Set **Root Directory** to `backend`, environment/runtime to Docker, and health check path to `/health`.
-3. Set `ELEXON_BASE_URL=https://data.elexon.co.uk/bmrs/api/v1`, `CACHE_TTL_SECONDS=900`, and `REQUEST_TIMEOUT_SECONDS=30`.
-4. Deploy and confirm `https://YOUR-API.onrender.com/health` returns `{"status":"ok","service":"wind-forecast-workbench"}`.
+To reproduce:
 
-The included `render.yaml` is a starting point; review its service name before applying it.
+1. Import this repository into Vercel **twice** (one project per service).
+2. Frontend project: set **Root Directory** to `frontend`. Add the environment variable `VITE_API_BASE_URL=https://<your-backend-url>` for **Production and Preview**, then deploy. Note that Vite bakes this value in at build time — adding it later requires a redeploy without build cache.
+3. Backend project: set **Root Directory** to `backend`. No secrets are required — the Elexon API is public and keyless, and `CORS_ORIGINS` accepts any `https://*.vercel.app` origin by pattern.
+4. Verify `GET <backend>/health` returns `{"status":"ok","service":"wind-forecast-workbench"}` and `GET <backend>/api/dashboard?month=2026-01&cutoff=09:00` returns January 2026 records, then open the frontend in an incognito window.
 
-### 2. Deploy the frontend to Vercel
-
-1. Import the same repository in Vercel.
-2. Set **Root Directory** to `frontend`.
-3. Set `VITE_API_BASE_URL=https://YOUR-API.onrender.com` in the Vercel project environment.
-4. Build command: `npm run build`; output directory: `dist`.
-5. Deploy, open the Vercel URL in a private/incognito window, and verify the dashboard loads real data.
-
-The API permits `*.vercel.app` origins by regex. For a custom domain, add that exact origin to `CORS_ORIGINS` on the API service and redeploy.
+For a local containerized parity check: `docker compose up --build` from the repository root (frontend on :8080, API on :8000).
 
 ## Required 10-minute demo video outline
 
